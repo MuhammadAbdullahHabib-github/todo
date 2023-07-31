@@ -45,3 +45,13 @@ export const update = async (id:string, updatedObj:IbaseTodo):Promise<Itodo | nu
     console.log(typeof updatedObject);
     return updatedObject;
 }
+
+// delete
+export const remove = async (id:string):Promise<Itodo | null> => {
+    const todoItem = await todo.findOne({'_id':id});
+    if(todoItem == null ){
+        return null;
+    }
+    const deletedItem = await todoItem.deleteOne();
+    return deletedItem.toObject();
+}

@@ -46,3 +46,13 @@ todoRouter.put('/:id', async (req:Request, res:Response) => {
         res.status(500).send(error);
     }
 })
+
+todoRouter.delete('/:id', async (req:Request, res:Response) => {
+    try {
+        const id:string = req.params.id;
+        await TodoService.remove(id);
+        res.status(200).send(`Delete Api is working`);
+    } catch (error) {
+        res.status(500).send(error)      
+    }
+})
