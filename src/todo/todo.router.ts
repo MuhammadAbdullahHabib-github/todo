@@ -47,6 +47,17 @@ todoRouter.put('/:id', async (req:Request, res:Response) => {
     }
 })
 
+todoRouter.patch('/:id', async (req:Request, res:Response) => {
+    try {
+        const id:string = req.params.id;
+        const updatedTodo:IbaseTodo = req.body;
+        const updatedItem = await TodoService.patch(id, updatedTodo);
+        res.status(200).json(updatedItem)
+    } catch (error: unknown) {  
+        res.status(500).send(error);
+    }
+})
+
 todoRouter.delete('/:id', async (req:Request, res:Response) => {
     try {
         const id:string = req.params.id;

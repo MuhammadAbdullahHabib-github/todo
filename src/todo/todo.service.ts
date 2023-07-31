@@ -42,9 +42,20 @@ export const update = async (id:string, updatedObj:IbaseTodo):Promise<Itodo | nu
         return null;
     }
     const updatedObject = await todoItem.updateOne(updatedObj);
-    console.log(typeof updatedObject);
     return updatedObject;
 }
+
+//patch
+
+export const patch = async (id:string, updatedObj:IbaseTodo):Promise<Itodo | null> => {
+    const todoItem = await todo.findOne({ _id: id });
+    if (todoItem == null) {
+      return null;
+    }
+    const patchedItem = await todoItem.updateOne(updatedObj);
+    return patchedItem;
+}
+
 
 // delete
 export const remove = async (id:string):Promise<Itodo | null> => {
@@ -55,3 +66,5 @@ export const remove = async (id:string):Promise<Itodo | null> => {
     const deletedItem = await todoItem.deleteOne();
     return deletedItem.toObject();
 }
+
+
