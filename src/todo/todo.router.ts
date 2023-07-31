@@ -21,8 +21,8 @@ todoRouter.get('/:id', async (req:Request, res:Response) => {
     try {
         const todo:Itodo | null= await TodoService.find(id);
         res.status(200).json(todo)
-    } catch (error) {
-        res.status(500).send(error)
+    } catch (error: any) {
+        res.status(400).send(error?.message)
     }
 })
 

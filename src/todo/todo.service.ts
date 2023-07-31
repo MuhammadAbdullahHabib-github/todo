@@ -12,26 +12,29 @@ export const create = async(newItem: IbaseTodo):Promise<Itodo> => {
 
 // find One
 export const find = async (id:string):Promise<Itodo | null> => {
-    const findItem = await todo.findOne({'_id':id});
-    if(findItem === null){
-        return null;
+    try {
+        const todoItem = await todo.findOne({'_id':id});
+        if(todoItem){
+            return todoItem.toObject();
+        }
+        throw new Error("Todo not found");
+    } catch (error) {
+        throw error;
     }
-    return findItem.toObject();
-
 }
 
-// find all
 export const findAll = async():Promise<Itodos | null> => {
-    const findAll = await todo.find();
-    if(findAll == null || findAll.length === 0){
-        return null
+    try {
+        const todos = await todo.find();
+        
+        const result = todos.map((todo: IbaseTodo)=>{
+            return todo.toObject();
+        })
+
+        return result;
+    } catch (error) {
+        throw error;
     }
-    
-    const allTodos:Itodos = {};
-    findAll.forEach((todo)=>{
-        allTodos[todo._id] = todo.toObject();
-    })
-    return allTodos;
 }
 
 // update
