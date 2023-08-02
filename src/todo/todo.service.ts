@@ -10,28 +10,29 @@ export const create = async (newItem: IbaseTodo): Promise<Itodo> => {
   return createdItem.toObject();
 };
 
-// find One
+// *
 export const find = async (id: string): Promise<Itodo | null> => {
   try {
     const todoItem = await todo.findOne({ _id: id });
     if (todoItem) {
       return todoItem.toObject();
     }
-    throw new Error("Todo not found");
+    throw new Error(`Todo with id:${id} is not found`);
   } catch (error) {
     throw error;
   }
 };
-
+//*
 export const findAll = async (): Promise<Itodos | null> => {
   try {
     const todos = await todo.find();
-
     const result = todos.map((todo: IbaseTodo) => {
       return todo.toObject();
     });
-
-    return result;
+    if (result) {
+      return result;
+    }
+    throw new Error("No Todos found");
   } catch (error) {
     throw error;
   }

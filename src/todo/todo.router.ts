@@ -1,10 +1,16 @@
 import express, { Request, Response } from "express";
 import * as TodoService from "./todo.service";
+import { param, check, validationResult } from "express-validator";
 import { IbaseTodo, Itodo } from "./todo.interface";
+import { Itodos } from "./todos.interface";
 
 export const todoRouter = express.Router();
 
-todoRouter.post("/", async (req: Request, res: Response) => {
+todoRouter.post("/", [
+  check('title'),
+  check('description'),
+  check('timestamps')
+], async (req: Request, res: Response) => {
   try {
     const todo: IbaseTodo = req.body;
     await TodoService.create(todo);
@@ -14,22 +20,30 @@ todoRouter.post("/", async (req: Request, res: Response) => {
   }
 });
 
-todoRouter.get("/:id", async (req: Request, res: Response) => {
-  const id: string = req.params.id;
-  try {
-    const todo: Itodo | null = await TodoService.find(id);
-    res.status(200).json(todo);
-  } catch (error: any) {
-    res.status(400).send(error?.message);
+todoRouter.get(
+  "/:id",
+  [param("id").isMongoId().withMessage("ID should be a valid mongoID")],
+  async (req: Request, res: Response) => {
+    try {
+      const error = validationResult(req);
+      if (!error.isEmpty()) {
+        res.status(422).json({ error: error.array() });
+      }
+      const id: string = req.params.id;
+      const todo: Itodo | null = await TodoService.find(id);
+      res.status(200).json(todo);
+    } catch (error: any) {
+      res.status(404).send(error.message);
+    }
   }
-});
+);
 
 todoRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const allTodos = await TodoService.findAll();
+    const allTodos: Itodos | null = await TodoService.findAll();
     res.status(200).json(allTodos);
-  } catch (error) {
-    res.status(500).send(error);
+  } catch (error: any) {
+    res.status(404).send(error.message);
   }
 });
 
