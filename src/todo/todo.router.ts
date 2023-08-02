@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import * as TodoService from "./todo.service";
 import { param, check, validationResult } from "express-validator";
 import { IbaseTodo, Itodo } from "./todo.interface";
@@ -6,34 +6,64 @@ import { Itodos } from "./todos.interface";
 
 export const todoRouter = express.Router();
 
-todoRouter.post("/", [
-  check('title'),
-  check('description'),
-  check('timestamps')
-], async (req: Request, res: Response) => {
-  try {
-    const todo: IbaseTodo = req.body;
-    await TodoService.create(todo);
-    res.status(200).json(todo);
-  } catch (error) {
-    res.status(500).send(error);
+const validateMongoIdParam = param("id")
+  .isMongoId()
+  .withMessage("ID should be a valid mongoID");
+
+const validateTodoFields = [
+  check("title").not().isEmpty().withMessage("Please enter title"),
+  check("description").not().isEmpty().withMessage("Please enter description"),
+  check("timestamps").not().isEmpty().withMessage("Please enter timestamps"),
+];
+
+const handleValidationResult = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const error = validationResult(req);
+  if (!error.isEmpty()) {
+    return res.status(422).json({ error: error.array() });
   }
-});
+  next();
+};
+
+const handleNotFoundError = (res: Response) => {
+  return res.status(404).send("Resource not found");
+};
+
+const handleServerError = (res: Response, error: any) => {
+  console.error(error);
+  res.status(500).send("Internal server error");
+};
+
+todoRouter.post(
+  "/",
+  [...validateTodoFields, handleValidationResult],
+  async (req: Request, res: Response) => {
+    try {
+      const todo: IbaseTodo = req.body;
+      await TodoService.create(todo);
+      res.status(201).json(todo);
+    } catch (error) {
+      handleServerError(res, error);
+    }
+  }
+);
 
 todoRouter.get(
   "/:id",
-  [param("id").isMongoId().withMessage("ID should be a valid mongoID")],
+  [validateMongoIdParam, handleValidationResult],
   async (req: Request, res: Response) => {
     try {
-      const error = validationResult(req);
-      if (!error.isEmpty()) {
-        res.status(422).json({ error: error.array() });
-      }
       const id: string = req.params.id;
       const todo: Itodo | null = await TodoService.find(id);
-      res.status(200).json(todo);
+      if (!todo) {
+        handleNotFoundError(res);
+      }
+      return res.status(200).json(todo);
     } catch (error: any) {
-      res.status(404).send(error.message);
+      handleServerError(res, error);
     }
   }
 );
@@ -41,41 +71,64 @@ todoRouter.get(
 todoRouter.get("/", async (req: Request, res: Response) => {
   try {
     const allTodos: Itodos | null = await TodoService.findAll();
-    res.status(200).json(allTodos);
+    if (!allTodos) {
+      handleNotFoundError(res);
+    }
+    return res.status(200).json(allTodos);
   } catch (error: any) {
-    res.status(404).send(error.message);
+    handleServerError(res, error);
   }
 });
 
-todoRouter.put("/:id", async (req: Request, res: Response) => {
-  try {
-    const id: string = req.params.id;
-    const updatedTodo: IbaseTodo = req.body;
-    const updatedItem = await TodoService.update(id, updatedTodo);
-    res.status(200).json(updatedItem);
-  } catch (error: unknown) {
-    console.log(error);
-    res.status(500).send(error);
+todoRouter.put(
+  "/:id",
+  [validateMongoIdParam, ...validateTodoFields, handleValidationResult],
+  async (req: Request, res: Response) => {
+    try {
+      const id: string = req.params.id;
+      const updatedTodo: IbaseTodo = req.body;
+      const updatedItem = await TodoService.update(id, updatedTodo);
+      if(!updatedItem){
+        handleNotFoundError(res)
+      }
+      res.status(200).json(updatedItem);
+    } catch (error: unknown) {
+      handleServerError(res, error);
+    }
   }
-});
+);
 
-todoRouter.patch("/:id", async (req: Request, res: Response) => {
-  try {
-    const id: string = req.params.id;
-    const updatedTodo: IbaseTodo = req.body;
-    const updatedItem = await TodoService.patch(id, updatedTodo);
-    res.status(200).json(updatedItem);
-  } catch (error: unknown) {
-    res.status(500).send(error);
+todoRouter.patch(
+  "/:id",
+  [validateMongoIdParam, handleValidationResult],
+  async (req: Request, res: Response) => {
+    try {
+      const id: string = req.params.id;
+      const updatedTodo: IbaseTodo = req.body;
+      const updatedItem = await TodoService.patch(id, updatedTodo);
+      if(!updatedItem){
+        handleNotFoundError(res);
+      }
+      res.status(200).json(updatedItem);
+    } catch (error: unknown) {
+      handleServerError(res, error);
+    }
   }
-});
+);
 
-todoRouter.delete("/:id", async (req: Request, res: Response) => {
-  try {
-    const id: string = req.params.id;
-    await TodoService.remove(id);
-    res.status(200).send(`Delete Api is working`);
-  } catch (error) {
-    res.status(500).send(error);
+todoRouter.delete(
+  "/:id",
+  [validateMongoIdParam, handleValidationResult],
+  async (req: Request, res: Response) => {
+    try {
+      const id: string = req.params.id;
+      const deleteItem = await TodoService.remove(id);
+      if(deleteItem === null){
+        handleNotFoundError(res);
+      }
+      res.status(200).send(`Delete Api is working`);
+    } catch (error) {
+      handleServerError(res,error);
+    }
   }
-});
+);
