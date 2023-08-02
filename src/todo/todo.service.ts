@@ -1,4 +1,4 @@
-import { ITodo} from "./todo.interface";
+import { ITodo } from "./todo.interface";
 import todo from "./todo.model";
 
 export const create = async (newItem: ITodo): Promise<ITodo> => {
@@ -27,7 +27,7 @@ export const find = async (id: string): Promise<ITodo | null> => {
 
 export const findAll = async (): Promise<ITodo[] | null> => {
   try {
-    const todos:ITodo[] = await todo.find();
+    const todos: ITodo[] = await todo.find();
     const result = todos.map((todo: ITodo) => {
       return todo.toObject();
     });
