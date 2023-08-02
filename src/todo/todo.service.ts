@@ -1,4 +1,4 @@
-import { IbaseTodo, Itodo } from "./todo.interface";
+import { IbaseTodo, IpartialTodo, Itodo } from "./todo.interface";
 import { Itodos } from "./todos.interface";
 import todo from "./todo.model";
 
@@ -63,7 +63,7 @@ export const update = async (
 export const patch = async (
   id: string,
   updatedObj: IbaseTodo
-): Promise<Itodo | null> => {
+): Promise<IpartialTodo | null> => {
   try {
     const todoItem = await todo.findOne({ _id: id });
     if (todoItem == null) {
