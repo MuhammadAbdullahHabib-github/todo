@@ -1,73 +1,96 @@
-import { IbaseTodo, Itodo } from "./todo.interface";
+import { IbaseTodo, IpartialTodo, Itodo } from "./todo.interface";
 import { Itodos } from "./todos.interface";
-import todo from './todo.model'
+import todo from "./todo.model";
 
-// connectivity
-// Add new Item
-
-export const create = async(newItem: IbaseTodo):Promise<Itodo> => {
+export const create = async (newItem: IbaseTodo): Promise<Itodo> => {
+  try {
     const createdItem = await todo.create(newItem);
-    return createdItem.toObject()
-}
-
-// find One
-export const find = async (id:string):Promise<Itodo | null> => {
-    try {
-        const todoItem = await todo.findOne({'_id':id});
-        if(todoItem){
-            return todoItem.toObject();
-        }
-        throw new Error("Todo not found");
-    } catch (error) {
-        throw error;
+    if (createdItem) {
+      return createdItem.toObject();
     }
-}
+    throw new Error("Todo could not be created");
+  } catch (error: any) {
+    throw error;
+  }
+};
 
-export const findAll = async():Promise<Itodos | null> => {
-    try {
-        const todos = await todo.find();
-        
-        const result = todos.map((todo: IbaseTodo)=>{
-            return todo.toObject();
-        })
-
-        return result;
-    } catch (error) {
-        throw error;
+export const find = async (id: string): Promise<Itodo | null> => {
+  try {
+    const todoItem = await todo.findOne({ _id: id });
+    if (todoItem) {
+      return todoItem.toObject();
     }
-}
+    throw new Error(`Todo with id:${id} is not found`);
+  } catch (error) {
+    throw error;
+  }
+};
 
-// update
+export const findAll = async (): Promise<Itodos | null> => {
+  try {
+    const todos = await todo.find();
+    const result = todos.map((todo: IbaseTodo) => {
+      return todo.toObject();
+    });
+    if (result) {
+      return result;
+    }
+    throw new Error("No Todos found");
+  } catch (error) {
+    throw error;
+  }
+};
 
-export const update = async (id:string, updatedObj:IbaseTodo):Promise<Itodo | null> => {
-    const todoItem = await todo.findOne({'_id':id});
-    if(todoItem == null ){
-        return null;
+export const update = async (
+  id: string,
+  updatedObj: IbaseTodo
+): Promise<Itodo | null> => {
+  try {
+    const todoItem = await todo.findOne({ _id: id });
+    if (todoItem == null) {
+      return null;
     }
     const updatedObject = await todoItem.updateOne(updatedObj);
-    return updatedObject;
-}
+    if (updatedObject) {
+      return updatedObject;
+    }
+    throw new Error("Todo not updated");
+  } catch (error: any) {
+    throw error;
+  }
+};
 
-//patch
-
-export const patch = async (id:string, updatedObj:IbaseTodo):Promise<Itodo | null> => {
+export const patch = async (
+  id: string,
+  updatedObj: IbaseTodo
+): Promise<IpartialTodo | null> => {
+  try {
     const todoItem = await todo.findOne({ _id: id });
     if (todoItem == null) {
       return null;
     }
     const patchedItem = await todoItem.updateOne(updatedObj);
-    return patchedItem;
-}
+    if (patchedItem) {
+      return patchedItem;
+    }
+    throw new Error("Todo not patched");
+  } catch (error: any) {
+    throw error;
+  }
+};
 
-
-// delete
-export const remove = async (id:string):Promise<Itodo | null> => {
-    const todoItem = await todo.findOne({'_id':id});
-    if(todoItem == null ){
-        return null;
+export const remove = async (id: string): Promise<Itodo | null> => {
+  try {
+    const todoItem = await todo.findOne({ _id: id });
+    if (todoItem == null) {
+      return null;
     }
     const deletedItem = await todoItem.deleteOne();
-    return deletedItem.toObject();
-}
-
-
+    if (deletedItem) {
+      return deletedItem.toObject();
+    }
+    throw new Error("Todo not deleted");
+  } catch (error) {
+    throw error;
+  }
+};
