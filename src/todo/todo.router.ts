@@ -1,8 +1,8 @@
 import express, { NextFunction, Request, Response } from "express";
 import * as TodoService from "./todo.service";
 import { param, check, validationResult } from "express-validator";
-import { IbaseTodo, Itodo } from "./todo.interface";
-import { Itodos } from "./todos.interface";
+import { ITodo } from "./todo.interface";
+
 
 export const todoRouter = express.Router();
 
@@ -42,7 +42,7 @@ todoRouter.post(
   [...validateTodoFields, handleValidationResult],
   async (req: Request, res: Response) => {
     try {
-      const todo: IbaseTodo = req.body;
+      const todo: ITodo = req.body;
       await TodoService.create(todo);
       res.status(201).json(todo);
     } catch (error) {
@@ -57,7 +57,7 @@ todoRouter.get(
   async (req: Request, res: Response) => {
     try {
       const id: string = req.params.id;
-      const todo: Itodo | null = await TodoService.find(id);
+      const todo: ITodo | null = await TodoService.find(id);
       if (!todo) {
         handleNotFoundError(res);
       }
@@ -70,7 +70,7 @@ todoRouter.get(
 
 todoRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const allTodos: Itodos | null = await TodoService.findAll();
+    const allTodos: ITodo[] | null = await TodoService.findAll();
     if (!allTodos) {
       handleNotFoundError(res);
     }
@@ -86,7 +86,7 @@ todoRouter.put(
   async (req: Request, res: Response) => {
     try {
       const id: string = req.params.id;
-      const updatedTodo: IbaseTodo = req.body;
+      const updatedTodo: ITodo = req.body;
       const updatedItem = await TodoService.update(id, updatedTodo);
       if(!updatedItem){
         handleNotFoundError(res)
@@ -104,12 +104,12 @@ todoRouter.patch(
   async (req: Request, res: Response) => {
     try {
       const id: string = req.params.id;
-      const updatedTodo: IbaseTodo = req.body;
+      const updatedTodo: ITodo = req.body;
       const updatedItem = await TodoService.patch(id, updatedTodo);
       if(!updatedItem){
         handleNotFoundError(res);
       }
-      res.status(200).json(updatedItem);
+      res.status(204).json(updatedItem);
     } catch (error: unknown) {
       handleServerError(res, error);
     }
@@ -126,7 +126,7 @@ todoRouter.delete(
       if(deleteItem === null){
         handleNotFoundError(res);
       }
-      res.status(200).send(`Delete Api is working`);
+      res.status(204);
     } catch (error) {
       handleServerError(res,error);
     }
