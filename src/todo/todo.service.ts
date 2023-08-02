@@ -1,8 +1,7 @@
-import { IbaseTodo, IpartialTodo, Itodo } from "./todo.interface";
-import { Itodos } from "./todos.interface";
+import { ITodo} from "./todo.interface";
 import todo from "./todo.model";
 
-export const create = async (newItem: IbaseTodo): Promise<Itodo> => {
+export const create = async (newItem: ITodo): Promise<ITodo> => {
   try {
     const createdItem = await todo.create(newItem);
     if (createdItem) {
@@ -14,7 +13,7 @@ export const create = async (newItem: IbaseTodo): Promise<Itodo> => {
   }
 };
 
-export const find = async (id: string): Promise<Itodo | null> => {
+export const find = async (id: string): Promise<ITodo | null> => {
   try {
     const todoItem = await todo.findOne({ _id: id });
     if (todoItem) {
@@ -26,10 +25,10 @@ export const find = async (id: string): Promise<Itodo | null> => {
   }
 };
 
-export const findAll = async (): Promise<Itodos | null> => {
+export const findAll = async (): Promise<ITodo[] | null> => {
   try {
-    const todos = await todo.find();
-    const result = todos.map((todo: IbaseTodo) => {
+    const todos:ITodo[] = await todo.find();
+    const result = todos.map((todo: ITodo) => {
       return todo.toObject();
     });
     if (result) {
@@ -43,8 +42,8 @@ export const findAll = async (): Promise<Itodos | null> => {
 
 export const update = async (
   id: string,
-  updatedObj: IbaseTodo
-): Promise<Itodo | null> => {
+  updatedObj: ITodo
+): Promise<ITodo | null> => {
   try {
     const todoItem = await todo.findOne({ _id: id });
     if (todoItem == null) {
@@ -62,8 +61,8 @@ export const update = async (
 
 export const patch = async (
   id: string,
-  updatedObj: IbaseTodo
-): Promise<IpartialTodo | null> => {
+  updatedObj: ITodo
+): Promise<Partial<ITodo> | null> => {
   try {
     const todoItem = await todo.findOne({ _id: id });
     if (todoItem == null) {
@@ -79,7 +78,7 @@ export const patch = async (
   }
 };
 
-export const remove = async (id: string): Promise<Itodo | null> => {
+export const remove = async (id: string): Promise<ITodo | null> => {
   try {
     const todoItem = await todo.findOne({ _id: id });
     if (todoItem == null) {

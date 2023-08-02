@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IbaseTodo, Itodo } from "./todo.interface";
+import { ITodo } from "./todo.interface";
 
 const todoSchema: mongoose.Schema = new mongoose.Schema({
   title: {
@@ -16,4 +16,4 @@ const todoSchema: mongoose.Schema = new mongoose.Schema({
   },
 });
 
-export default mongoose.model<IbaseTodo>("todo", todoSchema);
+export default mongoose.model<ITodo>("todo", todoSchema);
