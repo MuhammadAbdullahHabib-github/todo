@@ -3,5 +3,5 @@ WORKDIR /backend
 COPY ./package*.json ./
 RUN npm install
 COPY . .
-EXPOSE 5500
+EXPOSE 7000
 CMD ["npm", "run", "dev"]
