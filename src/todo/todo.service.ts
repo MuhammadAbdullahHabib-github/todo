@@ -1,15 +1,15 @@
 import { ITodo } from "./todo.interface";
 import todo from "./todo.model";
 
-export const create = async (newItem: ITodo): Promise<ITodo> => {
+export const createTodo = async (newItem: ITodo): Promise<ITodo> => {
   try {
     const createdItem = await todo.create(newItem);
     if (createdItem) {
-      return createdItem.toObject();
+      return createdItem;
     }
-    throw new Error("Todo could not be created");
+    throw new Error("Failed to create Todo");
   } catch (error: any) {
-    throw error;
+    throw new Error(`Failed to create Todo: ${error.message}`);
   }
 };
 

@@ -43,7 +43,7 @@ todoRouter.post(
   async (req: Request, res: Response) => {
     try {
       const todo: ITodo = req.body;
-      await TodoService.create(todo);
+      await TodoService.createTodo(todo);
       res.status(201).json(todo);
     } catch (error) {
       handleServerError(res, error);
