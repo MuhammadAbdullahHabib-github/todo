@@ -50,7 +50,7 @@ userRouter.post(
         email,
         password: hashedPassword,
       };
-      const user = await UserService.createUser(newUser);
+      const user = UserService.createUser(newUser);
       res.status(201).json(user);
     } catch (error: any) {
       handleServerError(res, error);
