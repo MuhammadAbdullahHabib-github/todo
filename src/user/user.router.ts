@@ -1,8 +1,9 @@
+import  jwt  from 'jsonwebtoken';
 import express, { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import * as UserService from "./user.service";
 export const userRouter = express.Router();
-import { validationResult, param, check } from "express-validator";
+import { validationResult, check } from "express-validator";
 import { IUser } from "./user.interface";
 
 const saltRounds = 10;
@@ -17,7 +18,6 @@ const validateUserFields = [
   check("email").not().isEmpty().withMessage("Please enter email"),
   check("password").not().isEmpty().withMessage("Please enter password"),
 ];
-
 const handleValdiaionResult = (
   req: Request,
   res: Response,
