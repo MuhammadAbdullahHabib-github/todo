@@ -10,15 +10,15 @@ export const login = async (loginUser: IUserAuth ): Promise<string> => {
         const {email, password} = loginUser;
         const userDoc = await user.findOne({email:email}).select('password');
         if(!userDoc){
-            throw new Error('Invalid Credentials');
+            throw new Error('Invalid Credentials User Not Found');
         }
         const isPasswordMatch =await bcrypt.compare(password, userDoc.password);
         if(!isPasswordMatch){
-            throw new Error('Invalid Credentials');
+            throw new Error('Invalid Credentials Check Your Password');
         }
         const token = jwt.sign({ user: userDoc._id }, process.env.JWT_SECRET_KEY as string, { expiresIn: '1h' });
         return token;
     } catch (error:any) {
-        throw new Error(`Invalid Credentials ${error.message}`);
+        throw new Error(`${error.message}`);
     }
 }

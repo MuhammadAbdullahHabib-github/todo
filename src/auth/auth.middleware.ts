@@ -1,3 +1,4 @@
+import { IDecodedUser, IAuthMiddlewareRequest } from "./auth.interface";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
@@ -6,14 +7,21 @@ const handleServerError = (res: Response, error: any) => {
   res.status(500).send(error.message);
 };
 
-const middleware = (req: Request, res: Response, next: Function) => {
+export const middleware = (
+  req: IAuthMiddlewareRequest,
+  res: Response,
+  next: Function
+) => {
   const token = req.header("x-auth-token");
   if (!token) {
     return res.status(401).json({ msg: "No token, authorization denied" });
   }
   try {
-    const decode = jwt.verify(token, process.env.JWT_SECRET_KEY as string);
-    console.log(decode);	
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET_KEY as string
+    ) as IDecodedUser;
+    req.user = decoded.user;
     next();
   } catch (error: any) {
     handleServerError(res, error);

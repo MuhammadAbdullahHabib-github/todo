@@ -22,10 +22,6 @@ let userSchema = new mongoose.Schema({
         required:true,
         minlength:6,
     },
-    todos: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "todo"
-    }]
 });
 
 export default mongoose.model<IUser>("user", userSchema);
