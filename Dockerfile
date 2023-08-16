@@ -1,7 +1,7 @@
-FROM node:16
-WORKDIR /backend
-COPY ./package*.json ./
+FROM node:latest
+WORKDIR /app
+COPY package*.json /app
 RUN npm install
-COPY . .
+COPY . /app
 EXPOSE 7000
-CMD ["npm", "run", "dev"]
+CMD ["npm","run","dev"]

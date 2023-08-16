@@ -1,0 +1,19 @@
+version: "3.5"
+services:
+  nodejs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7000:7000"
+    depends_on:
+      - mongo
+  mongo:
+    image: "mongo:latest"
+    ports:
+      - "8000:27017"
+    volumes:
+      - mongodb_data:/data/db
+volumes:
+  mongodb_data:
+
