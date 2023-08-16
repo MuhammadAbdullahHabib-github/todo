@@ -1,4 +1,4 @@
-import { IAuthMiddlewareRequest } from './../auth/auth.interface';
+import { IAuthMiddlewareRequest } from "./../auth/auth.interface";
 import express, { NextFunction, Request, Response } from "express";
 import { middleware } from "./../auth/auth.middleware";
 import * as TodoService from "./todo.service";
@@ -13,7 +13,7 @@ const validateMongoIdParam = param("id")
 
 const validateTodoFields = [
   check("title").not().isEmpty().withMessage("Please enter title"),
-  check("description").not().isEmpty().withMessage("Please enter description")
+  check("description").not().isEmpty().withMessage("Please enter description"),
 ];
 
 const handleValidationResult = (
@@ -47,7 +47,7 @@ todoRouter.post(
   async (req: IAuthMiddlewareRequest, res: Response) => {
     try {
       const todo: ITodo = req.body;
-      todo.user_id = req.user ;
+      todo.user_id = req.user;
       const newTodo = await TodoService.createTodo(todo);
       res.status(201).json(newTodo);
     } catch (error) {
@@ -63,10 +63,11 @@ todoRouter.post(
 todoRouter.get(
   "/:id",
   [validateMongoIdParam, handleValidationResult, middleware],
-  async (req: Request, res: Response) => {
+  async (req: IAuthMiddlewareRequest, res: Response) => {
     try {
       const id: string = req.params.id;
-      const todo: ITodo | null = await TodoService.find(id);
+      const user_id = req.user;
+      const todo: ITodo | null = await TodoService.find(id, user_id);
       if (!todo) {
         handleNotFoundError(res);
       }
@@ -81,17 +82,22 @@ todoRouter.get(
 // @desc Get all todos
 // @access Private
 
-todoRouter.get("/", middleware, async (req: Request, res: Response) => {
-  try {
-    const allTodos: ITodo[] | null = await TodoService.findAll();
-    if (!allTodos) {
-      handleNotFoundError(res);
+todoRouter.get(
+  "/",
+  middleware,
+  async (req: IAuthMiddlewareRequest, res: Response) => {
+    try {
+      const user_id = req.user;
+      const allTodos: ITodo[] | null = await TodoService.findAll(user_id);
+      if (!allTodos) {
+        handleNotFoundError(res);
+      }
+      return res.status(200).json(allTodos);
+    } catch (error: any) {
+      handleServerError(res, error);
     }
-    return res.status(200).json(allTodos);
-  } catch (error: any) {
-    handleServerError(res, error);
   }
-});
+);
 
 // @route PUT /api/todo/:id
 // @desc Update a todo
@@ -105,11 +111,12 @@ todoRouter.put(
     handleValidationResult,
     middleware,
   ],
-  async (req: Request, res: Response) => {
+  async (req: IAuthMiddlewareRequest, res: Response) => {
     try {
       const id: string = req.params.id;
       const updatedTodo: ITodo = req.body;
-      const updatedItem = await TodoService.update(id, updatedTodo);
+      const user_id = req.user;
+      const updatedItem = await TodoService.update(id, updatedTodo, user_id);
       if (!updatedItem) {
         handleNotFoundError(res);
       }
@@ -126,11 +133,12 @@ todoRouter.put(
 todoRouter.patch(
   "/:id",
   [validateMongoIdParam, handleValidationResult, middleware],
-  async (req: Request, res: Response) => {
+  async (req: IAuthMiddlewareRequest, res: Response) => {
     try {
       const id: string = req.params.id;
       const updatedTodo: ITodo = req.body;
-      const updatedItem = await TodoService.patch(id, updatedTodo);
+      const user_id = req.user;
+      const updatedItem = await TodoService.patch(id, updatedTodo, user_id);
       if (!updatedItem) {
         handleNotFoundError(res);
       }
@@ -148,10 +156,11 @@ todoRouter.patch(
 todoRouter.delete(
   "/:id",
   [validateMongoIdParam, handleValidationResult, middleware],
-  async (req: Request, res: Response) => {
+  async (req: IAuthMiddlewareRequest, res: Response) => {
     try {
       const id: string = req.params.id;
-      const deleteItem = await TodoService.remove(id);
+      const user_id = req.user;
+      const deleteItem = await TodoService.remove(id,user_id);
       if (deleteItem === null) {
         handleNotFoundError(res);
       }
